@@ -16,6 +16,11 @@ app.listen(config.PORT, () => {
 app.use(cors())
 app.use(json({ limit: '2mb' }))
 
+app.use((req, res, next) => {
+  console.log(`Request Type: ${req.method} to ${req.url}`);
+  next();
+})
+
 app.use('/users', usersRoutes)
 
 

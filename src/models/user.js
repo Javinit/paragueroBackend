@@ -1,22 +1,27 @@
 import { Schema, model } from 'mongoose'
 
 const Users = new Schema({
-    userName: {
+    name: {
         type: String,
         require: true
     },
-    userPassword: {
+    password: {
         type: String,
         require: true
     },
-    userEmail: {
+    email: {
         type: String,
         require: true,
         unique: true
     },
-    userLevel: {
+    level: {
         type: Number,
         require: true
+    },
+    active: {
+        type: Boolean,
+        require: true,
+        default: true
     }
 })
 
