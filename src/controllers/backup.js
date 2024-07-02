@@ -1,4 +1,4 @@
-import Course from '../models/courses.js'
+import {config} from '../config/index.js'
 import { MongoTransferer, MongoDBDuplexConnector, LocalFileSystemDuplexConnector } from 'mongodb-snapshot';
 
 export class backupController {
@@ -6,7 +6,7 @@ export class backupController {
         try {
             const mongo_connector = new MongoDBDuplexConnector({
                 connection: {
-                    uri: `mongodb://127.0.0.1/paraguero_server?directConnection=true`,
+                    uri: config.DBURI,
                     dbname: 'paraguero_server',
                 },
             });
@@ -40,7 +40,7 @@ export class backupController {
         try {
             const mongo_connector = new MongoDBDuplexConnector({
                 connection: {
-                    uri: `mongodb://127.0.0.1/paraguero_server?directConnection=true`,
+                    uri: config.DBURI,
                     dbname: 'paraguero_server',
                 },
             });
