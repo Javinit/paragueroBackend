@@ -4,6 +4,7 @@ import 'dotenv/config'
 import { config } from './config/index.js'
 import { startDb } from './config/mongo.js'
 import { usersRoutes } from './routes/users.js'
+import { courseRouter } from './routes/course.js'
 const app = express()
 
 app.get('/', (req, res) => {
@@ -22,6 +23,7 @@ app.use((req, res, next) => {
 })
 
 app.use('/users', usersRoutes)
+app.use('/course', courseRouter)
 
 
 await startDb()

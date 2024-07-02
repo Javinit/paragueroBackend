@@ -1,4 +1,4 @@
-import Course from '../models/courses'
+import Course from '../models/courses.js'
 
 export class courseController {
     static async getCourse(req, res) {
@@ -54,10 +54,10 @@ export class courseController {
 
             if (!courseFind) return res.status(400).json({ error: 'No se ha encontrado el curso' })
             const update = {}
-            if (courseName) filter.name = courseName
-            if (courseTeacher) filter.teacher = courseTeacher
-            if (courseHours) filter.hours = courseHours
-            if (courseDescription) filter.description = courseDescription
+            if (courseName) update.name = courseName
+            if (courseTeacher) update.teacher = courseTeacher
+            if (courseHours) update.hours = courseHours
+            if (courseDescription) update.description = courseDescription
 
             // Realizar validaciones para username and password
 
@@ -66,6 +66,7 @@ export class courseController {
             return res.status(202).json({ message: "Se ha creado el curso correctamente" })
 
         } catch (error) {
+            console.log('error ', error);
             if (error.message) return res.status(400).json({ error: error.message })
             return res.status(400).json({ error })
         }
@@ -74,10 +75,10 @@ export class courseController {
 
     static async deleteCourse(req, res) {
         try {
-            const { courseId } = req.body;
+            const { courseId } = req.query;
             if (!courseId) return res.status(400).json({ error: 'Debes de enviar el curso a eliminar' });
 
-            const courseToUpdate = Course.findOne({ _id: userId });
+            const courseToUpdate = Course.findOne({ _id: courseId });
 
             if (!courseToUpdate) return res.status(400).json({ error: 'No se ha encontrado a este curso' });
 

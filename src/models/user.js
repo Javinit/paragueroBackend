@@ -14,6 +14,11 @@ const Users = new Schema({
         require: true,
         unique: true
     },
+    phone: {
+        type: String,
+        require: true,
+        unique: true
+    },
     level: {
         type: Number,
         require: true

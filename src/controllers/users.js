@@ -29,7 +29,7 @@ export class usersController {
         try {
             const { userId } = req.body
 
-            const filter = { active: true }
+            const filter = { active: true, level: { $nin: [1] } }
 
             if (userId) {
                 filter._id = userId
@@ -39,7 +39,7 @@ export class usersController {
             }
 
             const usersFind = await User.find(filter, { password: 0 })
-            return res.status(202).json({ users: usersFind })
+            return res.status(202).json(usersFind)
         } catch (error) {
             if (error.message) return res.status(400).json({ error: error.message })
             return res.status(400).json({ error })
@@ -49,17 +49,19 @@ export class usersController {
     static async createUser(req, res) {
         try {
             const { userName, password, userEmail } = req.body
+            console.log('REQ BODY ', req.body);
+
             if (!userName || !password || !userEmail) return res.status(400).json({ error: 'Completa todos los campos' })
 
             const newHashPassword = await generateHash(password)
 
             // Realizar validaciones para username and password
 
-            const newUser = new User({ userName: userName, userPassword: newHashPassword, userEmail: userEmail, userLevel: 2 })
+            const newUser = new User({ name: userName, password: newHashPassword, email: userEmail, level: 2 })
             await newUser.save()
 
-            const initToken = await createJWT({ userName: newUser.userName, userEmail: newUser.userEmail })
-            return res.status(202).json({ token: initToken, userName: newUser.userName, userEmail: newUser.userEmail })
+            const initToken = await createJWT({ name: newUser.userName, email: newUser.userEmail })
+            return res.status(202).json({ token: initToken, name: newUser.userName, email: newUser.userEmail })
 
         } catch (error) {
             if (error.message) return res.status(400).json({ error: error.message })
@@ -70,7 +72,8 @@ export class usersController {
 
     static async updateUser(req, res) {
         try {
-            const { userName, password, userEmail, userId } = req.body;
+            const { userName, userPassword, userEmail, userPhone, userId } = req.body;
+            console.log('ACTUALIZANDO ', req.body);
             if (!userName && !password && !userEmail) return res.status(400).json({ error: 'No has enviado ningún dato' });
             if (!userId) return res.status(400).json({ error: 'Debes de enviar el usuario a actualizar' });
 
@@ -80,9 +83,10 @@ export class usersController {
 
             const update = {};
 
-            if (password) update.password = await generateHash(password);
-            if (userName) update.userName = userName;
-            if (userEmail) update.userEmail = userEmail;
+            if (userPassword) update.password = await generateHash(userPassword);
+            if (userName) update.name = userName;
+            if (userEmail) update.email = userEmail;
+            if (userPhone) update.phone = userPhone;
 
             // Realizar validaciones para username and password
 
@@ -97,7 +101,8 @@ export class usersController {
 
     static async deleteUser(req, res) {
         try {
-            const { userId } = req.body;
+            const { userId } = req.query;
+            console.log('REQ ', req.query);
             if (!userId) return res.status(400).json({ error: 'Debes de enviar el usuario a eliminar' });
 
             const userToUpdate = User.findOne({ _id: userId });
