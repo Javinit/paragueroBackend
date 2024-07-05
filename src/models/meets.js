@@ -1,6 +1,6 @@
 import mongoose, { Schema, model } from 'mongoose'
 
-const Users = new Schema({
+const Meets = new Schema({
     course: {
         type: Schema.Types.ObjectId,
         ref: 'courses',
@@ -19,6 +19,6 @@ const Users = new Schema({
 
 })
 
-const User = model("users", Users)
+const Meet = model("meet", Meets)
 
-export default User
+export default Meet
