@@ -4,19 +4,25 @@ const Meets = new Schema({
     course: {
         type: Schema.Types.ObjectId,
         ref: 'courses',
-        require: true
+        required: true
     },
     room: {
         type: Schema.Types.ObjectId,
         ref: 'rooms',
-        require: true
+        required: true
+    },
+    status: {
+        type: String,
+        default: 'pending'
     },
     fullDate: {
         type: Date,
-        require: true
-    }
-
-
+        required: true
+    },
+    users: [{
+        type: Schema.Types.ObjectId,
+        ref: 'users',
+    }]
 })
 
 const Meet = model("meet", Meets)

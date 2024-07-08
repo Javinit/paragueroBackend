@@ -4,21 +4,32 @@ export class courseController {
     static async getCourse(req, res) {
         try {
             const { courseId, name, teacher, hours } = req.body
+            const { isForMeets } = req.query
+
+
 
             const filter = { active: true }
+
 
             if (courseId) {
                 filter._id = courseId
                 const courseFind = await Course.findOne(filter)
                 if (!courseFind) return res.status(400).json({ error: 'Curso no encontrado' })
                 return res.send(courseFind)
-
             }
             if (name) filter.name = courseId
             if (teacher) filter.teacher = courseId
             if (hours) filter.hours = courseId
 
-            const coursesFind = await Course.find(filter)
+            let coursesFind = await Course.find(filter)
+
+
+            if (isForMeets) {
+                coursesFind = coursesFind.map((e) => {
+                    // return { label: e.name, value: e.name, id: e._id }
+                    return { label: `${e.name} - ${e.teacher}`,  id: e._id }
+                })
+            }
             return res.send(coursesFind)
         } catch (error) {
             if (error.message) return res.status(400).json({ error: error.message })

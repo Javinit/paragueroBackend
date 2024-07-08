@@ -8,6 +8,8 @@ import { startDb } from './config/mongo.js'
 import { usersRoutes } from './routes/users.js'
 import { courseRouter } from './routes/course.js'
 import { backupRouter } from './routes/backup.js'
+import { roomRouter } from './routes/rooms.js';
+import { meetRouter } from './routes/meets.js';
 const app = express()
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
@@ -33,6 +35,8 @@ app.use((req, res, next) => {
 app.use('/users', usersRoutes)
 app.use('/course', courseRouter)
 app.use('/backup', backupRouter)
+app.use('/room', roomRouter)
+app.use('/meet', meetRouter)
 
 
 await startDb()

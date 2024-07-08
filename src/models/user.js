@@ -3,33 +3,32 @@ import { Schema, model } from 'mongoose'
 const Users = new Schema({
     name: {
         type: String,
-        require: true
+        required: true
     },
     password: {
         type: String,
-        require: true
+        required: true
     },
     email: {
         type: String,
-        require: true,
+        required: true,
         unique: true
     },
     phone: {
         type: String,
-        require: true,
         unique: true
     },
     level: {
         type: Number,
-        require: true
+        required: true
     },
     active: {
         type: Boolean,
-        require: true,
+        required: true,
         default: true
     }
 })
 
-const User = model("Users", Users)
+const User = model("users", Users)
 
 export default User

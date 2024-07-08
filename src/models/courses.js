@@ -3,15 +3,15 @@ import { Schema, model } from 'mongoose';
 const Courses = new Schema({
     name: {
         type: String,
-        require: true
+        required: true
     },
     teacher: {
         type: String,
-        require: true
+        required: true
     },
     hours: {
         type: String,
-        require: true,
+        required: true,
     },
     description: {
         type: String,

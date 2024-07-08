@@ -48,16 +48,16 @@ export class usersController {
 
     static async createUser(req, res) {
         try {
-            const { userName, password, userEmail } = req.body
+            const { userName, password, userEmail, phone } = req.body
             console.log('REQ BODY ', req.body);
 
-            if (!userName || !password || !userEmail) return res.status(400).json({ error: 'Completa todos los campos' })
+            if (!userName || !password || !userEmail || !phone) return res.status(400).json({ error: 'Completa todos los campos' })
 
             const newHashPassword = await generateHash(password)
 
             // Realizar validaciones para username and password
 
-            const newUser = new User({ name: userName, password: newHashPassword, email: userEmail, level: 2 })
+            const newUser = new User({ name: userName, password: newHashPassword, email: userEmail, level: 2, phone: phone })
             await newUser.save()
 
             const initToken = await createJWT({ name: newUser.userName, email: newUser.userEmail })
@@ -125,7 +125,6 @@ export class usersController {
             if (!authorization) return res.json({ status: false })
 
             const infoUser = await verifyJWT(authorization)
-            console.log('INFO USER ', infoUser);
             if (!infoUser || !infoUser.email) return res.json({ status: false })
 
             const user = await User.findOne({ email: infoUser.email }, { password: 0 })

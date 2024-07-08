@@ -3,13 +3,18 @@ import { Schema, model } from 'mongoose'
 const Rooms = new Schema({
     number: {
         type: Number,
-        require: true
+        required: true
     },
     status: {
         type: Boolean,
         default: true,
-        require: true
+        required: true
     },
+    active: {
+        type: Boolean,
+        default: true,
+        required: true
+    }
 
 })
 

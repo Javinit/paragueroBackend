@@ -1,56 +1,80 @@
-import Meets from '../models/meets'
-
-export class courseController {
-    static async getCourse(req, res) {
+import Meets from '../models/meets.js'
+import Course from '../models/courses.js'
+import Room from '../models/rooms.js'
+import moment from 'moment'
+export class meetController {
+    static async getMeets(req, res) {
         try {
-            const { courseId, name, teacher, hours } = req.body
+            const { meetId, date, endDate, courseId, isForInscribe } = req.query
 
-            const filter = { active: true }
+            const filter = {}
 
-            if (courseId) {
-                filter._id = courseId
-                const courseFind = await Course.findOne(filter)
-                if (!courseFind) return res.status(400).json({ error: 'Curso no encontrado' })
-                return res.send(courseFind)
-
+            if (meetId) {
+                filter._id = meetId
+                const meetFind = await Meets.findOne(filter).populate([
+                    {
+                        path: 'users',
+                        select: 'name phone email'
+                    }
+                ])
+                if (!meetFind) return res.status(400).json({ error: 'Encuentro no encontrado' })
+                return res.send(meetFind)
             }
-            if (name) filter.name = courseId
-            if (teacher) filter.teacher = courseId
-            if (hours) filter.hours = courseId
 
-            const coursesFind = await Course.find(filter)
-            return res.send(coursesFind)
+            if (courseId) filter.course = courseId
+
+
+
+            let meetsFind = (await Meets.find(filter, { users: 0 }).populate(['course', 'room'])).map(e => {
+                return { course: e.course, room: e.room, date: new Date(e.fullDate).toLocaleDateString(), time: new Date(e.fullDate).toLocaleTimeString().toUpperCase(), _id: e._id }
+            })
+
+            if (isForInscribe) {
+                meetsFind = meetsFind.map((e) => {
+                    // return { label: e.name, value: e.name, id: e._id }
+                    return { label: `${e.date} - ${e.time}`, data: e }
+                })
+            }
+            return res.send(meetsFind)
         } catch (error) {
             if (error.message) return res.status(400).json({ error: error.message })
             return res.status(400).json({ error })
         }
     }
 
-    static async createCourse(req, res) {
+    static async createMeet(req, res) {
         try {
-            const { courseName, courseTeacher, courseHours, courseDescription } = req.body
-            if (!courseName || !courseTeacher || !courseHours) return res.status(400).json({ error: 'Completa todos los campos' })
+            const { courseId, roomId, date, time } = req.body
+            if (!courseId || !roomId || !date || !time) return res.status(400).json({ error: 'Completa todos los campos' })
 
-            // Realizar validaciones para username and password
+            const dateTime = moment(date + ' ' + time, 'YYYY/MM/DD HH:mm');
+            if (moment().isAfter(dateTime)) return res.status(400).json({ error: 'La hora del encuentro debe de ser mayor que la actual' })
 
-            const newCourse = new Course({ name: courseName, teacher: courseTeacher, hours: courseHours, description: courseDescription })
-            await newCourse.save()
+            const courseFind = Course.findOne({ _id: courseId })
+            if (!courseFind) return res.status(400).json({ error: 'No se ha encontrando el curso asignado' })
+
+            const roomFind = Room.findOne({ _id: roomId })
+            if (!roomFind) return res.status(400).json({ error: 'No se ha encontrando el aula asignada' })
+
+            const newMeet = new Meets({ course: courseId, room: roomId, fullDate: new Date(dateTime) })
+            await newMeet.save()
 
             return res.status(202).json({ message: "Se ha creado el curso correctamente" })
 
         } catch (error) {
+            console.log('ERROR ', error);
             if (error.message) return res.status(400).json({ error: error.message })
             return res.status(400).json({ error })
         }
     }
 
-    static async editCourse(req, res) {
+    static async editMeet(req, res) {
         try {
             const { courseName, courseTeacher, courseHours, courseDescription, courseId } = req.body
 
             if (!courseId) return res.status(400).json({ error: 'Debes de enviar un curso a actualizar' })
 
-            const courseFind = await Course.find({ _id: courseId })
+            const courseFind = await Meets.find({ _id: courseId })
 
             if (!courseFind) return res.status(400).json({ error: 'No se ha encontrado el curso' })
             const update = {}
@@ -61,7 +85,7 @@ export class courseController {
 
             // Realizar validaciones para username and password
 
-            await Course.updateOne({ _id: courseId }, { $set: update })
+            await Meets.updateOne({ _id: courseId }, { $set: update })
 
             return res.status(202).json({ message: "Se ha creado el curso correctamente" })
 
@@ -72,16 +96,16 @@ export class courseController {
     }
 
 
-    static async deleteCourse(req, res) {
+    static async deleteMeet(req, res) {
         try {
             const { courseId } = req.body;
             if (!courseId) return res.status(400).json({ error: 'Debes de enviar el curso a eliminar' });
 
-            const courseToUpdate = Course.findOne({ _id: userId });
+            const courseToUpdate = Meets.findOne({ _id: userId });
 
             if (!courseToUpdate) return res.status(400).json({ error: 'No se ha encontrado a este curso' });
 
-            await Course.updateOne({ _id: courseId }, { $set: { active: false } });
+            await Meets.updateOne({ _id: courseId }, { $set: { active: false } });
             return res.status(202).json({ message: 'Usuario Actualizado' });
 
         } catch (error) {
@@ -90,4 +114,22 @@ export class courseController {
         }
     }
 
+    static async inscribeMeet(req, res) {
+        try {
+            const { meet } = req.query;
+            console.log('REQQ ', req.user);
+            if (!meet) return res.status(400).json({ error: 'Debes de enviar el encuentro a inscribir' });
+
+            const meetToInscribe = Meets.findOne({ _id: meet });
+
+            if (!meetToInscribe) return res.status(400).json({ error: 'No se ha encontrado a este encuentro' });
+
+            await Meets.updateOne({ _id: meet }, { $push: { users: req.user._id } });
+            return res.status(202).json({ message: 'Inscrito' });
+
+        } catch (error) {
+            if (error.message) return res.status(400).json({ error: error.message });
+            return res.status(400).json({ error });
+        }
+    }
 }
